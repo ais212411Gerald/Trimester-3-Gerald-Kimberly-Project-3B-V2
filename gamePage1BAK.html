@@ -1,0 +1,465 @@
+<html>
+<head>
+<title> Game </title>
+
+
+<script type="text/javascript" src="script/soundmanager2.js"></script>
+<script type="text/javascript" src="script/loadsoundchrome.js"></script>
+
+
+<center>
+<script type="text/javascript" src="script/processing-1.4.1.js"></script>
+<script type="text/processing" data-processing-target="mycanvas">
+
+
+
+int backgroundSpeed;//How fast the background moves
+
+PImage lvl;
+PImage city1;//City Background
+Pimage city2;//City Background
+
+
+int cityY1;//y-coordinate of city background
+int cityY2;//y-coordinate of city background
+int p1;
+
+PImage myCar;//My car
+int myCarX;//x-coordinate of my car
+
+int numberOfCars;//number of enemies passed by my car
+
+
+
+PImage car[] = new PImage[3];//images of enemies car
+int a;//Value that define the level of the enemies
+int b;//first enemy car
+int c;//second enemy car
+int d;//third enemy car
+
+int carX1[] = new int[3];//x-coordinate of first enemy car
+int carX2[] = new int[3];//x-coordinate of second enemy car
+int carX3[] = new int[3];//x-coordinate of third enemy car
+
+int speedY[] = new int[3];//speed of the enemy cars
+int carY1;//y-coordinate of first enemy car
+int carY2;//y-coordinate of second enemy car
+int carY3;//y-coordinate of third enemy car
+
+
+
+int roadX[] = new int [6];//x-coordinate of road
+int roadY[] = new int [10];//y-coordinate of road
+
+
+
+int crashingSound = 0; 
+int crashingSoundLength = 0; 
+  	
+int playBackgroundMusic = 1;
+int backgroundMusicLength = 0; 
+
+
+
+int gameStop;//game stops
+int	distance1;//distance between first enemy car and my car
+int	distance2;//distance between second enemy car and my car
+int	distance3;//distance between third enemy car and my car
+PImage flame;//images of the flame
+
+
+
+void setup()
+{  
+
+	size( 800, 600 );  
+    background(255,255,255);
+    frameRate( 30 );
+  
+  
+  
+//Background  
+  	//City Background
+  	city1 = loadImage("Images/cityBackground1.jpg");
+  	city2 = loadImage("Images/cityBackground2.jpg");
+  	lvl = loadImage("Images/lvl.png"); 
+  
+	cityY1 = 0;
+	cityY2 = 940;
+	p1 = 0;
+	
+	backgroundSpeed = 2;
+	font = loadFont("Orator 15 Pitch.ttf");
+	
+	
+	//Road Background
+	e = 1;
+	f = 1;
+	while( e < 6)
+	{
+		roadX[e] = 308 + 100 * (f - 1);
+		roadY[f] = 100 * (f - 1);
+		roadY[f] = roadY[f] - backgroundSpeed;
+		
+		e = e + 1;
+		f = f + 2;	
+	}
+	
+	
+	//Play and Repeat the Background Music
+    playBackgroundMusic = 1;
+    backgroundMusicLength = 0; 
+    
+    crashingSound = 0;
+    crashingSoundLength = 0;
+
+
+//Game
+	//Control My Car 
+	myCar = loadImage("Images/car3.png");
+	myCarX = 432;
+	
+	holdLeftButton = 0;
+	holdRightButton = 0;
+	
+	
+	//Enemy Cars
+	numberOfCars = 0;
+	a = 1;
+	b = 1;
+	c = 1;
+	d = 1;
+	
+	while( a < 4)
+	{
+		
+		carY1 = random(-400,-300);
+		carY2 = random(-300,-200);
+		carY3 = random(-200,-150);
+	
+		car[a] = loadImage("Images/racingCarLevel"+a+".png");
+		
+		carX1[b] = (int)random(3,7) * 100 + 32;
+		carX2[c] = (int)random(3,7) * 100 + 32;
+		carX3[d] = (int)random(3,7) * 100 + 32;
+		
+		speedY[a] = 8 + 3 * a;
+		carY1 = carY1 + speedY[a];
+		carY2 = carY2 + speedY[a];
+		carY3 = carY3 + speedY[a];
+		
+		a = a + 1;
+		b = b + 1;
+		c = c + 1;
+		d = d + 1;
+	}
+	
+	a = 1;
+	b = 1;
+	c = 1;
+	d = 1;
+	
+	
+	
+//Game Stops
+	gameStop = 0;
+	distance1 = 0;
+	distance2 = 0;
+	distance3 = 0;	
+	flame = loadImage("Images/flame.png");
+	
+}  
+
+
+Void draw()
+{
+
+	background(0,0,0);
+	
+//Background
+	//Music
+	if( playBackgroundMusic == 1)
+	{
+		soundManager.play('s0');
+		playBackgroundMusic = 0;
+	}
+	
+	backgroundMusicLength = backgroundMusicLength +0.001;
+
+	if( backgroundMusicLength > 4.820)
+	{
+		playBackgroundMusic = 1;
+		backgroundMusicLength = 0;
+	}
+	
+	
+	
+	//City
+	image(city1,10,cityY1);
+	image(city2,10,cityY2);
+	
+	cityY1 = cityY1 - backgroundSpeed;
+	cityY2 = cityY2 - backgroundSpeed;
+	
+	if(cityY1 < -940)
+	{
+		cityY1 = 937;
+	}
+	
+	if(cityY2 < -940)
+	{
+		cityY2 = 937;
+	}
+	
+	fill(0,0,0);
+	rect(308,0,1000,600);
+	
+	
+	
+	//Road
+	e = 1;
+	f = 1;
+	while( e < 6)
+	{
+	
+		strokeCap(SQUARE);
+		stroke(255,255,255);
+		strokeWeight(3);
+		line(roadX[e],roadY[1],roadX[e],roadY[1]+ 50);
+		line(roadX[e],roadY[2],roadX[e],roadY[2]+ 50);
+		line(roadX[e],roadY[3],roadX[e],roadY[3]+ 50);
+		line(roadX[e],roadY[4],roadX[e],roadY[4]+ 50);
+		line(roadX[e],roadY[5],roadX[e],roadY[5]+ 50);
+		line(roadX[e],roadY[6],roadX[e],roadY[6]+ 50);
+		line(roadX[e],roadY[7],roadX[e],roadY[7]+ 50);
+		line(roadX[e],roadY[8],roadX[e],roadY[8]+ 50);
+		line(roadX[e],roadY[9],roadX[e],roadY[9]+ 50);
+		line(roadX[e],roadY[10],roadX[e],roadY[10]+ 50);
+
+		
+		roadY[f] = roadY[f] - backgroundSpeed;
+		
+		if(roadY[f] < -50)
+		{
+			roadY[f] = 450;
+		}
+		
+		e = e + 1;
+		f = f + 1;
+		
+	}
+	
+	
+	
+//Control My Car
+	image(myCar,myCarX,400);
+	
+	if(keyPressed == true)
+	{
+		if (keyCode == RIGHT)
+		{
+			if(632 != myCarX && holdRightButton == 0)
+			{
+				myCarX = myCarX + 100;
+				holdRightButton = 1;
+			}
+		}
+			
+		if (keyCode == LEFT)
+		{	
+			if (332 != myCarX && holdLeftButton == 0)
+			{
+				myCarX = myCarX - 100;
+				holdLeftButton = 1;
+			}
+		}
+	}
+	
+	
+	
+//Enemies		
+	carY1 = carY1 + speedY[a];
+	carY2 = carY2 + speedY[a];
+	carY3 = carY3 + speedY[a];
+		
+	image(car[a],carX1[b],carY1);
+	image(car[a],carX2[c],carY2);
+	image(car[a],carX3[d],carY3);
+	
+	if(p1 == 1)
+	{
+	image(lvl,400,150);
+	}
+	
+	if( carY3 > 502)
+	{
+		d = d + 1;
+		carY3 = random(-200,-150);
+		numberOfCars = numberOfCars + 1;
+	
+	}
+
+	if( d == 4)
+	{
+		d = 1;
+	}
+	
+	
+	
+	if( carY2 > 502)
+	{
+		c = c + 1;
+		carY2 = random(-300,-200);
+		numberOfCars = numberOfCars + 1;
+	}
+	
+	if( c == 4)
+	{
+		c = 1;
+	}
+	
+	
+	
+	if( carY1 > 502)
+	{
+		b = b + 1;
+		carY1 = random(-400,-300);
+		numberOfCars = numberOfCars + 1;
+	}
+	
+	if( b == 4)
+	{
+		b = 1;
+	}
+	
+	
+	if( carX1[b] == carX2[c] && carY1 < -85)
+	{
+		carX1[b] = (int)random(3,7) * 100 + 32;
+	}
+	
+	if( carX3[d] == carX2[c] && carY2 < -85)
+	{
+		carX2[c] = (int)random(3,7) * 100 + 32;
+	}
+	
+	 
+	if( carX3[d] == carX1[b] && carY3 < -85)
+	{
+		carX3[d] = (int)random(3,7) * 100 + 32;
+	}
+	
+	if( numberOfCars > 12 && numberOfCars < 24 )
+	{
+		a = 2;
+		p1 = 1;
+	}
+	
+	if( numberOfCars > 15 && numberOfCars < 27 )
+	{
+	p1 = 0;
+	}
+	
+	if(numberOfCars >= 24 )
+	{
+		a = 3;
+		p1 = 1;
+	}
+	
+	if(numberOfCars >= 27 )
+	{
+	p1 = 0;
+	}
+
+
+	
+	//Game Stops
+	distance1 = (int)sqrt(sq(myCarX-carX1[b])+sq(400-carY1));
+	distance2 = (int)sqrt(sq(myCarX-carX2[c])+sq(400-carY2));
+	distance3 = (int)sqrt(sq(myCarX-carX3[d])+sq(400-carY3));
+
+	if(distance1 < 75 && distance1 > 40)
+	{
+		gameStop = 1;
+	}
+	
+	if(distance2 < 75 && distance2 > 40)
+	{
+		gameStop = 1;
+	}
+	
+	if(distance3 < 75 && distance3 > 40)
+	{
+		gameStop = 1;
+	}
+
+	
+	if(gameStop == 1)
+	{
+		playBackgroundMusic = 2;
+		
+		speedY[a] = 0;
+		backgroundSpeed = 0;
+		
+		holdLeftButton = 1;
+		holdRightButton = 1;
+		
+		image(flame,myCarX,400);
+		
+		crashingSoundLength = crashingSoundLength + 0.01;
+				
+	}
+	
+	if(crashingSoundLength > 0.01)
+	{
+		crashingSound = 1;
+		
+	}
+	
+	if(crashingSound == 1)
+	{
+		soundManager.play('s1');
+		crashingSound = 0;
+	}
+	
+	
+	if(crashingSoundLength > 0.5)
+	{
+	
+		link("crash2.html");
+	}
+	
+	 //Score
+
+    fill(46,139,87);
+    textFont(font,30);
+	text(a * numberOfCars * 5,200,40);
+	
+	fill(46,139,87);
+	textFont(font,30);
+	text("Score",30,40);
+	
+}
+
+
+void keyReleased()
+{
+	if (keyCode == LEFT)
+	{
+		holdLeftButton = 0;
+	}
+	
+	if (keyCode == RIGHT)
+	{
+		holdRightButton = 0;
+	}
+}
+
+</script>
+<canvas id="mycanvas"></canvas>
+</head>
+
+<body>
+
+</body>
+</html>
